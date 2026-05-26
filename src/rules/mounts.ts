@@ -10,6 +10,10 @@ export function scanWritableMounts(server: McpServer): Finding[] {
   for (let index = 0; index < server.args.length; index += 1) {
     const arg = server.args[index];
     const next = server.args[index + 1];
+    if (arg === undefined) {
+      continue;
+    }
+
     const candidate = mountCandidate(arg, next);
 
     if (candidate && writeHintPattern.test(candidate)) {

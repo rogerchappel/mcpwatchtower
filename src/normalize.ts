@@ -26,15 +26,21 @@ function normalizeServer(name: string, path: string, value: unknown): McpServer 
     };
   }
 
-  return {
+  const server: McpServer = {
     name: serverName(name, value),
     path,
     value,
-    command: stringValue(value.command),
     args: stringArray(value.args),
     env: isRecord(value.env) ? value.env : {},
     tools: discoverTools(value)
   };
+
+  const command = stringValue(value.command);
+  if (command !== undefined) {
+    server.command = command;
+  }
+
+  return server;
 }
 
 function serverName(fallback: string, value: Record<string, unknown>): string {

@@ -7,7 +7,7 @@ export const severityOrder: Record<Severity, number> = {
   critical: 4
 };
 
-export function isSeverity(value: string): value is Severity {
+export function isSeverity(value: unknown): value is Severity {
   return value === "low" || value === "medium" || value === "high" || value === "critical";
 }
 

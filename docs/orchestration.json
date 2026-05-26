@@ -1,0 +1,20 @@
+{
+  "name": "mcpwatchtower",
+  "type": "local-cli",
+  "networkDuringScan": false,
+  "executesMcpServers": false,
+  "pipeline": [
+    "read-json",
+    "normalize-config",
+    "run-rules",
+    "render-report",
+    "apply-exit-threshold"
+  ],
+  "checks": [
+    "npm run check",
+    "npm test",
+    "npm run smoke",
+    "npm run package:smoke",
+    "bash scripts/validate.sh"
+  ]
+}

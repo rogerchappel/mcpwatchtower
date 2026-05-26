@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "filesystem-readonly": {
+      "command": "node",
+      "args": ["./server.js", "--root", "./docs"],
+      "env": {
+        "LOG_LEVEL": "info"
+      },
+      "tools": ["read_file"]
+    },
+    "pinned-package": {
+      "command": "npx",
+      "args": ["@example/mcp-server@1.2.3"],
+      "tools": ["search_docs"]
+    }
+  }
+}

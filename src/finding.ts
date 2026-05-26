@@ -9,14 +9,19 @@ export function finding(
   remediation: string,
   evidence?: string
 ): Finding {
-  return {
+  const result: Finding = {
     id,
     severity,
     title,
     message,
     remediation,
     serverName: server.name,
-    path: server.path,
-    evidence
+    path: server.path
   };
+
+  if (evidence !== undefined) {
+    result.evidence = evidence;
+  }
+
+  return result;
 }
