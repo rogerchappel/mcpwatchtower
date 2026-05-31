@@ -2,26 +2,21 @@
 
 ## Supported Versions
 
-Replace this section with the supported versions for `mcpwatchtower`.
-
-Example:
-
-```md
 | Version | Supported |
 | --- | --- |
-| .x | Yes |
-| < .0 | No |
-```
+| 0.x | Yes, after the first public package release |
 
-If the project does not publish versioned releases yet, say that clearly.
+`mcpwatchtower` is currently pre-1.0. Until the first public package release,
+security reports should target the default branch.
 
 ## Reporting a Vulnerability
 
 Please do not report suspected vulnerabilities in public issues, pull requests, or discussions.
 
-Ask maintainers for the private security reporting path before sharing details.
-
-If no private reporting path exists yet, ask maintainers through public project channels for a private reporting path. Do not include exploit details, secrets, personal data, or sensitive technical details in public messages.
+Use GitHub private vulnerability reporting when it is enabled for the repository.
+If it is not enabled yet, open a public issue asking for a private reporting
+path without including exploit details, secrets, personal data, or sensitive
+technical details.
 
 ## What to Include
 

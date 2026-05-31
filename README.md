@@ -11,6 +11,12 @@ treated as a review aid rather than a complete security scanner.
 ## Install
 
 ```sh
+npm install mcpwatchtower
+```
+
+For local development:
+
+```sh
 npm install
 npm run build
 ```
@@ -19,7 +25,7 @@ npm run build
 
 ```sh
 npx mcpwatchtower scan .mcp.json
-mcpwatchtower scan fixtures/risky.json --format json --fail-on medium
+mcpwatchtower scan tests/fixtures/risky.json --format json --fail-on medium
 cat config.json | mcpwatchtower scan -
 ```
 
@@ -59,9 +65,13 @@ should be small, reviewable, and verified before review.
 ## Security
 
 See [SECURITY.md](SECURITY.md) for vulnerability reporting guidance. Replace
-the default security policy before publishing the generated repository.
+the private reporting path with project-specific contact details before a
+public release.
 
-These links assume this README has been copied to the generated repository root.
+## Examples
+
+Example configs live in [examples](examples). They are intentionally small so
+the scanner output is easy to inspect.
 
 ## License
 

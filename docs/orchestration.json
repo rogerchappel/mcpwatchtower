@@ -15,6 +15,15 @@
     "npm test",
     "npm run smoke",
     "npm run package:smoke",
+    "npm run release:check",
     "bash scripts/validate.sh"
-  ]
+  ],
+  "releaseCandidate": {
+    "classification": "ship-ready after gates pass and maintainer review",
+    "notes": "RELEASE_NOTES.md",
+    "manualSmoke": [
+      "node dist/src/cli.js scan tests/fixtures/risky.json --format json --fail-on medium",
+      "cat tests/fixtures/clean.json | node dist/src/cli.js scan - --format text --fail-on high"
+    ]
+  }
 }

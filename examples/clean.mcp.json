@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "docs-reader": {
+      "command": "node",
+      "args": ["./servers/docs-reader.js", "--root", "./docs"],
+      "env": {
+        "LOG_LEVEL": "info"
+      },
+      "tools": ["read_docs"]
+    }
+  }
+}

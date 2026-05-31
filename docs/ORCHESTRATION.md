@@ -23,5 +23,12 @@ bash scripts/validate.sh
 
 ## Release Readiness
 
-Before publishing, create the GitHub repository, push `main`, configure branch
-protection, and verify release workflows with `npm run release:check`.
+Before publishing, verify release workflows with `npm run release:check`, run a
+real CLI smoke, confirm branch protection, and review [RELEASE_NOTES.md](../RELEASE_NOTES.md).
+
+## Safety Boundaries
+
+- Scans are local and deterministic.
+- The CLI reads config JSON only; it does not execute configured MCP commands.
+- The CLI performs no package, reputation, vulnerability, or network lookups.
+- Non-zero exits are controlled by `--fail-on` and are intended for preflight gates.

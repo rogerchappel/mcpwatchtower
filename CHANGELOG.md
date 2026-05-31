@@ -9,13 +9,14 @@ format and uses semantic versioning when versioned releases are published.
 
 ### Added
 
-- Initial project setup.
+- Local-first `mcpwatchtower scan` CLI for MCP config preflight checks.
+- Static checks for shell evaluation, pipe-to-shell downloads, unpinned package launches, risky environment exposure, writable mount hints, and duplicate names.
+- Text and JSON output with configurable `--fail-on` thresholds.
+- Fixture-backed tests, example configs, and release readiness docs.
 
 ## Release Links
 
 - Unreleased:
-  `https://github.com/rogerchappel/mcpwatchtower/compare/...HEAD`
+  `https://github.com/rogerchappel/mcpwatchtower/compare/v0.1.0...HEAD`
 - Latest release:
   `https://github.com/rogerchappel/mcpwatchtower/releases/latest`
-
-Replace placeholder links once the first release tag exists.
