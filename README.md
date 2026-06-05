@@ -76,3 +76,14 @@ the scanner output is easy to inspect.
 ## License
 
 MIT
+
+## Verification
+
+Run these checks before opening a PR or publishing a release:
+
+```bash
+npm test
+npm run smoke
+npm run package:smoke
+npm run release:check
+```
