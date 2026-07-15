@@ -73,6 +73,10 @@ public release.
 Example configs live in [examples](examples). They are intentionally small so
 the scanner output is easy to inspect.
 
+## Safety Notes
+
+This package is intended for local, reviewable developer and agent workflows. Review generated reports, plans, or artifacts before sharing them publicly or using them to drive external actions. Do not place secrets, private logs, customer data, or credentials in fixtures, issues, or examples.
+
 ## License
 
 MIT
