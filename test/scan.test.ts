@@ -61,6 +61,56 @@ test("scanConfig allows direct executables and shells without inline command fla
   }
 });
 
+test("scanConfig distinguishes writable Docker mounts from read-only mounts", () => {
+  const writable = [
+    ["run", "-v", "/workspace:/app", "image@sha256:abc"],
+    ["run", "--volume=/workspace:/app:rw", "image@sha256:abc"],
+    ["run", "--mount", "type=bind,source=/workspace,target=/app", "image@sha256:abc"],
+    ["run", "--mount=type=bind,src=/workspace,dst=/app,readonly=false", "image@sha256:abc"]
+  ];
+  const readOnly = [
+    ["run", "-v", "/workspace:/app:ro", "image@sha256:abc"],
+    ["run", "--volume=/workspace:/app:readonly", "image@sha256:abc"],
+    ["run", "--mount", "type=bind,source=/workspace,target=/app,readonly", "image@sha256:abc"],
+    ["run", "--mount=type=bind,src=/workspace,dst=/app,readonly=true", "image@sha256:abc"]
+  ];
+
+  for (const args of writable) {
+    const report = scanConfig("mount", JSON.stringify({ mcpServers: { test: { command: "docker", args } } }));
+    assert.equal(report.findings.some((finding) => finding.id === "filesystem.writable-mount"), true, args.join(" "));
+  }
+
+  for (const args of readOnly) {
+    const report = scanConfig("mount", JSON.stringify({ mcpServers: { test: { command: "docker", args } } }));
+    assert.equal(report.findings.some((finding) => finding.id === "filesystem.writable-mount"), false, args.join(" "));
+  }
+});
+
+test("scanConfig parses package selector options for package runners", () => {
+  const pinned = [
+    { command: "npm", args: ["exec", "--yes", "--package=@scope/server@1.2.3", "--", "server"] },
+    { command: "npx", args: ["-y", "-p", "server@1.2.3", "server"] },
+    { command: "pnpm", args: ["dlx", "--package", "server@1.2.3", "server"] },
+    { command: "yarn", args: ["dlx", "server@1.2.3"] },
+    { command: "bun", args: ["x", "--package=server@1.2.3", "server"] },
+    { command: "uvx", args: ["--from", "server@1.2.3", "server"] }
+  ];
+  const unpinned = pinned.map(({ command, args }) => ({
+    command,
+    args: args.map((arg) => arg.replace("server@1.2.3", "server"))
+  }));
+
+  for (const server of pinned) {
+    const report = scanConfig("package", JSON.stringify({ mcpServers: { test: server } }));
+    assert.equal(report.findings.some((finding) => finding.id === "package.unpinned"), false, `${server.command} ${server.args.join(" ")}`);
+  }
+
+  for (const server of unpinned) {
+    const report = scanConfig("package", JSON.stringify({ mcpServers: { test: server } }));
+    assert.equal(report.findings.some((finding) => finding.id === "package.unpinned"), true, `${server.command} ${server.args.join(" ")}`);
+  }
+});
+
 test("CLI scans a file and exits zero below the fail threshold", async () => {
   const { stdout } = await execFileAsync("node", [
     "dist/src/cli.js",

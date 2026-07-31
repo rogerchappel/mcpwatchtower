@@ -39,9 +39,11 @@ It currently flags:
 
 - shell evaluation such as `bash -c`
 - network downloads piped to a shell
-- unpinned package-manager launches such as `npx package`
+- unpinned package-manager launches such as `npx package` (including package
+  selectors such as `npm exec --package=package` and `uvx --from package`)
 - broad or sensitive-looking environment pass-through
-- writable filesystem mount hints
+- Docker volume and bind mounts that are writable by default or explicitly
+  writable; `:ro`, `:readonly`, and `readonly=true` mounts are allowed
 - duplicate server or tool names where tools are listed in config
 
 `--fail-on` controls the exit threshold and defaults to `high`.
