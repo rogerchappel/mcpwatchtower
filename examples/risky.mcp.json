@@ -15,6 +15,10 @@
         "ENV": "*"
       },
       "tools": ["search"]
+    },
+    "writable-workspace": {
+      "command": "docker",
+      "args": ["run", "--mount", "type=bind,source=/workspace,target=/app", "example/server@sha256:replace-me"]
     }
   }
 }
