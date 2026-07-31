@@ -2,7 +2,6 @@ import { finding } from "../finding.js";
 import type { Finding, McpServer } from "../types.js";
 
 const mountFlags = new Set(["-v", "--volume", "--mount"]);
-const writeHintPattern = /(:rw\b|readonly=false|type=bind[^]*rw|,\s*rw\b)/i;
 
 export function scanWritableMounts(server: McpServer): Finding[] {
   const findings: Finding[] = [];
@@ -16,7 +15,7 @@ export function scanWritableMounts(server: McpServer): Finding[] {
 
     const candidate = mountCandidate(arg, next);
 
-    if (candidate && writeHintPattern.test(candidate)) {
+    if (candidate && !isReadOnlyMount(arg, candidate)) {
       findings.push(
         finding(
           server,
@@ -32,6 +31,19 @@ export function scanWritableMounts(server: McpServer): Finding[] {
   }
 
   return findings;
+}
+
+function isReadOnlyMount(arg: string, candidate: string): boolean {
+  const flag = arg.split("=", 1)[0];
+  if (flag === "--mount") {
+    return candidate.split(",").some((part) => {
+      const option = part.trim().toLowerCase();
+      return option === "readonly" || option === "ro" || /^readonly=(?:true|1)$/.test(option);
+    });
+  }
+
+  const options = candidate.slice(candidate.lastIndexOf(":") + 1).toLowerCase().split(",");
+  return options.includes("ro") || options.includes("readonly");
 }
 
 function mountCandidate(arg: string, next: string | undefined): string | undefined {

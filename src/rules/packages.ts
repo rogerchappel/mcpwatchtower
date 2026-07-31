@@ -1,7 +1,12 @@
 import { finding } from "../finding.js";
 import type { Finding, McpServer } from "../types.js";
 
-const packageManagers = new Set(["npx", "npm", "pnpm", "yarn", "bun", "uvx"]);
+const packageManagers = new Set(["npx", "npm", "pnpm", "yarn", "bun", "bunx", "uvx"]);
+const packageOptions = new Set(["--package", "-p", "--from"]);
+const optionsWithValues = new Set([
+  "--cache", "--cache-dir", "--call", "-c", "--cwd", "--directory", "-C", "--loglevel",
+  "--node-options", "--prefix", "--registry", "--script-shell", "--shell", "--userconfig"
+]);
 
 export function scanPackageSpecs(server: McpServer): Finding[] {
   const command = baseName(server.command ?? "");
@@ -28,18 +33,51 @@ export function scanPackageSpecs(server: McpServer): Finding[] {
 }
 
 function packageSpec(command: string, args: string[]): string | undefined {
-  const positional = args.filter((arg) => !arg.startsWith("-"));
-  if (command === "npm") {
-    const execIndex = positional.findIndex((arg) => arg === "exec" || arg === "x");
-    return execIndex >= 0 ? positional[execIndex + 1] : undefined;
+  const invocation = invocationArgs(command, args);
+  if (!invocation) {
+    return undefined;
   }
 
-  if (command === "pnpm" || command === "yarn" || command === "bun") {
-    const execIndex = positional.findIndex((arg) => arg === "dlx" || arg === "exec");
-    return execIndex >= 0 ? positional[execIndex + 1] : undefined;
+  for (let index = 0; index < invocation.length; index += 1) {
+    const arg = invocation[index];
+    if (arg === undefined || arg === "--") {
+      break;
+    }
+    if (packageOptions.has(arg)) {
+      return invocation[index + 1];
+    }
+    for (const option of packageOptions) {
+      if (arg.startsWith(`${option}=`)) {
+        return arg.slice(option.length + 1);
+      }
+    }
   }
 
-  return positional[0];
+  for (let index = 0; index < invocation.length; index += 1) {
+    const arg = invocation[index];
+    if (arg === undefined || arg === "--") {
+      break;
+    }
+    if (optionsWithValues.has(arg)) {
+      index += 1;
+    } else if (!arg.startsWith("-")) {
+      return arg;
+    }
+  }
+
+  return undefined;
+}
+
+function invocationArgs(command: string, args: string[]): string[] | undefined {
+  if (command === "npx" || command === "bunx" || command === "uvx") {
+    return args;
+  }
+
+  const modes = command === "npm" ? new Set(["exec", "x"])
+    : command === "pnpm" || command === "yarn" ? new Set(["dlx", "exec"])
+      : new Set(["x", "exec"]);
+  const modeIndex = args.findIndex((arg) => modes.has(arg));
+  return modeIndex >= 0 ? args.slice(modeIndex + 1) : undefined;
 }
 
 function isPinned(spec: string): boolean {
