@@ -35,6 +35,13 @@ The scanner accepts common MCP config shapes:
 - raw server maps
 - arrays of server objects
 
+These shapes must be non-empty, every server entry must be an object, and
+`mcpServers` itself must be an object map. Invalid shapes produce a
+`config.invalid-shape` finding at `high` severity instead of a successful
+zero-finding audit. Consequently, they exit non-zero with the default
+`--fail-on high` threshold; JSON and text output both include the finding and
+its remediation.
+
 It currently flags:
 
 - shell evaluation such as `bash -c`

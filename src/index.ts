@@ -1,4 +1,5 @@
 import { parseJsonConfig } from "./json.js";
+import { validateConfigShape } from "./config-shape.js";
 import { normalizeServers } from "./normalize.js";
 import { scanDuplicates } from "./rules/duplicates.js";
 import { scanEnvironment } from "./rules/env.js";
@@ -17,11 +18,12 @@ export function scanConfig(source: string, content: string): ScanReport {
   const config = parseJsonConfig(content, source);
   const servers = normalizeServers(config);
 
-  return scanServers(source, servers);
+  return scanServers(source, servers, validateConfigShape(config));
 }
 
-export function scanServers(source: string, servers: McpServer[]): ScanReport {
+export function scanServers(source: string, servers: McpServer[], initialFindings: Finding[] = []): ScanReport {
   const findings: Finding[] = [
+    ...initialFindings,
     ...scanDuplicates(servers)
   ];
 
