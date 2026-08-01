@@ -3,15 +3,23 @@ import type { McpServer } from "./types.js";
 
 export function normalizeServers(config: unknown): McpServer[] {
   if (Array.isArray(config)) {
-    return config.map((value, index) => normalizeServer(String(index), `$[${index}]`, value));
+    return config.flatMap((value, index) => (
+      isRecord(value) ? [normalizeServer(String(index), `$[${index}]`, value)] : []
+    ));
   }
 
   if (!isRecord(config)) {
     return [];
   }
 
+  if (Object.hasOwn(config, "mcpServers") && !isRecord(config.mcpServers)) {
+    return [];
+  }
+
   const serverSource = isRecord(config.mcpServers) ? config.mcpServers : config;
-  return Object.entries(serverSource).map(([name, value]) => normalizeServer(name, `$.${escapePath(name)}`, value));
+  return Object.entries(serverSource).flatMap(([name, value]) => (
+    isRecord(value) ? [normalizeServer(name, `$.${escapePath(name)}`, value)] : []
+  ));
 }
 
 function normalizeServer(name: string, path: string, value: unknown): McpServer {
