@@ -42,6 +42,12 @@ zero-finding audit. Consequently, they exit non-zero with the default
 `--fail-on high` threshold; JSON and text output both include the finding and
 its remediation.
 
+Each server entry requires a non-empty string `command`. Optional `args` must
+be an array of strings, `env` must be an object map, and `tools` must be an
+array containing tool-name strings or objects such as `{ "name": "read_file" }`.
+Field findings identify the exact invalid path, while valid sibling servers
+continue through the audit rules.
+
 It currently flags:
 
 - shell evaluation such as `bash -c`
