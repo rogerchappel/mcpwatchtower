@@ -164,6 +164,9 @@ function helpText(): string {
   return `Usage:
   mcpwatchtower scan [config.json|-] [--format text|json] [--fail-on low|medium|high|critical]
 
+Server entries require a non-empty string command. Optional args is a string
+array, env is an object map, and tools is an array of names or named objects.
+
 Examples:
   mcpwatchtower scan .mcp.json
   mcpwatchtower scan fixtures/risky.json --format json --fail-on medium
