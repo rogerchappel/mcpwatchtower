@@ -169,7 +169,7 @@ array, env is an object map, and tools is an array of names or named objects.
 
 Examples:
   mcpwatchtower scan .mcp.json
-  mcpwatchtower scan fixtures/risky.json --format json --fail-on medium
+  mcpwatchtower scan examples/risky.mcp.json --format json --fail-on medium
   cat config.json | mcpwatchtower scan -
 `;
 }

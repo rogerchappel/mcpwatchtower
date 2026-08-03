@@ -25,7 +25,7 @@ npm run build
 
 ```sh
 npx mcpwatchtower scan .mcp.json
-mcpwatchtower scan tests/fixtures/risky.json --format json --fail-on medium
+mcpwatchtower scan examples/risky.mcp.json --format json --fail-on medium
 cat config.json | mcpwatchtower scan -
 ```
 
