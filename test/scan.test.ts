@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
 import { spawn } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { test } from "node:test";
 import { promisify } from "node:util";
 
@@ -284,6 +284,14 @@ test("CLI scans stdin", async () => {
   assert.equal(result.code, 0);
   assert.equal(report.source, "-");
   assert.deepEqual(report.findings, []);
+});
+
+test("CLI help references a shipped example", async () => {
+  const { stdout } = await execFileAsync("node", ["dist/src/cli.js", "--help"]);
+  const examplePath = stdout.match(/mcpwatchtower scan (examples\/\S+\.json)/)?.[1];
+
+  assert.ok(examplePath, "expected CLI help to reference an example config");
+  await access(examplePath);
 });
 
 async function spawnWithInput(command: string, args: string[], input: string): Promise<{ code: number | null; stdout: string; stderr: string }> {
