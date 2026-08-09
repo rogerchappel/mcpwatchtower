@@ -47,6 +47,50 @@ test("scanConfig accepts each supported non-empty config shape", () => {
   }
 });
 
+test("scanConfig preserves JSONPath roots and unusual server names in rule findings", () => {
+  const riskyServer = { command: "sh", args: ["-c", "echo ready"] };
+  const cases = [
+    {
+      config: { mcpServers: { "demo-server": riskyServer } },
+      path: "$.mcpServers[\"demo-server\"]"
+    },
+    {
+      config: { "server with spaces": riskyServer },
+      path: "$[\"server with spaces\"]"
+    },
+    {
+      config: [{ name: "array server", ...riskyServer }],
+      path: "$[0]"
+    }
+  ];
+
+  for (const { config, path } of cases) {
+    const report = scanConfig("paths", JSON.stringify(config));
+    const finding = report.findings.find((item) => item.id === "command.shell-eval");
+    assert.ok(finding, JSON.stringify(config));
+    assert.equal(finding.path, path);
+  }
+});
+
+test("config-shape and rule findings use the same escaped server path", () => {
+  const serverName = "quoted\"server";
+  const ruleReport = scanConfig("rule-path", JSON.stringify({
+    mcpServers: { [serverName]: { command: "sh", args: ["-c", "echo ready"] } }
+  }));
+  const shapeReport = scanConfig("shape-path", JSON.stringify({
+    mcpServers: { [serverName]: { command: 42 } }
+  }));
+
+  assert.equal(
+    ruleReport.findings.find((finding) => finding.id === "command.shell-eval")?.path,
+    "$.mcpServers[\"quoted\\\"server\"]"
+  );
+  assert.equal(
+    shapeReport.findings.find((finding) => finding.id === "config.invalid-shape")?.path,
+    "$.mcpServers[\"quoted\\\"server\"].command"
+  );
+});
+
 test("scanConfig reports empty and malformed config shapes", () => {
   const cases = [
     { config: {}, path: "$", message: /at least one server/ },

@@ -1,4 +1,5 @@
 import { isRecord } from "./json.js";
+import { propertyPath } from "./json-path.js";
 import type { McpServer } from "./types.js";
 
 export function normalizeServers(config: unknown): McpServer[] {
@@ -16,9 +17,12 @@ export function normalizeServers(config: unknown): McpServer[] {
     return [];
   }
 
-  const serverSource = isRecord(config.mcpServers) ? config.mcpServers : config;
+  const mcpServers = config.mcpServers;
+  const nested = isRecord(mcpServers);
+  const serverSource = nested ? mcpServers : config;
+  const serverSourcePath = nested ? "$.mcpServers" : "$";
   return Object.entries(serverSource).flatMap(([name, value]) => (
-    isRecord(value) ? [normalizeServer(name, `$.${escapePath(name)}`, value)] : []
+    isRecord(value) ? [normalizeServer(name, propertyPath(serverSourcePath, name), value)] : []
   ));
 }
 
@@ -86,8 +90,4 @@ function discoverTools(value: Record<string, unknown>): string[] {
       return undefined;
     })
     .filter((tool): tool is string => Boolean(tool));
-}
-
-function escapePath(key: string): string {
-  return /^[A-Za-z_$][\w$]*$/.test(key) ? key : JSON.stringify(key);
 }
