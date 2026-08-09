@@ -1,4 +1,5 @@
 import { isRecord } from "./json.js";
+import { propertyPath } from "./json-path.js";
 import type { Finding } from "./types.js";
 
 export function validateConfigShape(config: unknown): Finding[] {
@@ -66,9 +67,4 @@ function invalidShape(path: string, message: string): Finding {
     remediation: "Use a supported config shape where every server has a non-empty string command; args is a string array, env is an object map, and tools is an array of names or objects with a string name.",
     path
   };
-}
-
-function propertyPath(parent: string, key: string): string {
-  const property = /^[A-Za-z_$][\w$]*$/.test(key) ? `.${key}` : `[${JSON.stringify(key)}]`;
-  return `${parent}${property}`;
 }
