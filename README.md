@@ -8,13 +8,30 @@ This repository is early-stage. The CLI is usable for deterministic local
 config checks, but the rule set is intentionally conservative and should be
 treated as a review aid rather than a complete security scanner.
 
+`mcpwatchtower` is not currently published to the npm registry. Install it
+from a source checkout and generated package tarball as described below. A
+GitHub release does not imply that an npm package has been published.
+
 ## Install
 
+Prerequisites: Git, Node.js 20 or newer, and the npm version bundled with
+Node.js.
+
 ```sh
-npm install mcpwatchtower
+git clone https://github.com/rogerchappel/mcpwatchtower.git
+cd mcpwatchtower
+npm ci
+PACKAGE_TARBALL="$(npm pack --silent)"
+cd ../your-project
+npm install "../mcpwatchtower/$PACKAGE_TARBALL"
 ```
 
-For local development:
+This installs the same tarball shape checked by the release workflow without
+claiming that the unpublished registry package exists. Keep the checkout and
+tarball path available until `npm install` completes.
+
+For repository development, stop after installing dependencies and build in
+the checkout:
 
 ```sh
 npm install
@@ -27,6 +44,14 @@ npm run build
 npx mcpwatchtower scan .mcp.json
 mcpwatchtower scan examples/risky.mcp.json --format json --fail-on medium
 cat config.json | mcpwatchtower scan -
+```
+
+The package root can also be imported from Node.js ESM:
+
+```js
+import { scanConfig } from "mcpwatchtower";
+
+const report = scanConfig("config.json", '{"mcpServers":{"demo":{"command":"node"}}}');
 ```
 
 The scanner accepts common MCP config shapes:
@@ -103,6 +128,12 @@ Run these checks before opening a PR or publishing a release:
 ```bash
 npm test
 npm run smoke
+npm run consumer:smoke
 npm run package:smoke
 npm run release:check
 ```
+
+`consumer:smoke` packs the checkout, installs the tarball in a clean temporary
+project, and exercises the documented `npx`, installed-binary, standard-input,
+and root-import paths. `package:smoke` is retained as an alias for the same
+check.
