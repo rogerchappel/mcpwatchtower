@@ -29,9 +29,11 @@
     "build": "tsc -p tsconfig.json",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test \"dist/test/**/*.test.js\"",
+    "prepack": "npm run build && chmod +x dist/src/cli.js",
     "package:smoke": "bash scripts/package-smoke.sh",
     "smoke": "npm run build && node dist/src/cli.js scan tests/fixtures/clean.json --format text --fail-on high",
-    "release:check": "npm test && npm run smoke && npm run package:smoke"
+    "consumer:smoke": "bash scripts/package-smoke.sh",
+    "release:check": "npm test && npm run smoke && npm run consumer:smoke"
   },
   "repository": {
     "type": "git",
