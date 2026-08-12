@@ -37,6 +37,8 @@ jobs:
         run: node /tmp/releasebox/bin/releasebox.js check .
       - name: Run release checks
         run: npm run release:check
+      - name: Verify release tag matches package version
+        run: npm run release:tag -- "$GITHUB_REF_NAME"
       - name: Build package
         run: npm pack
       - name: Generate release notes

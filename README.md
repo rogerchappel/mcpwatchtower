@@ -133,6 +133,11 @@ npm run package:smoke
 npm run release:check
 ```
 
+Release tags must exactly equal `v` followed by the version in `package.json`
+(for example, package version `0.1.0` requires tag `v0.1.0`). Verify a proposed
+tag locally with `npm run release:tag -- v0.1.0`; mismatched or malformed tags
+fail before the release workflow packages artifacts or creates a GitHub release.
+
 `consumer:smoke` packs the checkout, installs the tarball in a clean temporary
 project, and exercises the documented `npx`, installed-binary, standard-input,
 and root-import paths. `package:smoke` is retained as an alias for the same

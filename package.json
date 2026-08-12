@@ -33,7 +33,9 @@
     "package:smoke": "bash scripts/package-smoke.sh",
     "smoke": "npm run build && node dist/src/cli.js scan tests/fixtures/clean.json --format text --fail-on high",
     "consumer:smoke": "bash scripts/package-smoke.sh",
-    "release:check": "npm test && npm run smoke && npm run consumer:smoke"
+    "release:tag": "node scripts/check-release-tag.mjs",
+    "test:release-tag": "node --test scripts/check-release-tag.test.mjs",
+    "release:check": "npm test && npm run test:release-tag && npm run smoke && npm run consumer:smoke"
   },
   "repository": {
     "type": "git",
