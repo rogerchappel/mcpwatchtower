@@ -55,8 +55,11 @@ function packageSpec(command: string, args: string[]): string | undefined {
 
   for (let index = 0; index < invocation.length; index += 1) {
     const arg = invocation[index];
-    if (arg === undefined || arg === "--") {
+    if (arg === undefined) {
       break;
+    }
+    if (arg === "--") {
+      continue;
     }
     if (optionsWithValues.has(arg)) {
       index += 1;
