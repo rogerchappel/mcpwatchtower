@@ -239,6 +239,27 @@ test("scanConfig parses package selector options for package runners", () => {
   }
 });
 
+test("scanConfig parses package specs after an argument separator", () => {
+  const pinned = [
+    { command: "npm", args: ["exec", "--yes", "--", "example-package@1.2.3"] },
+    { command: "npx", args: ["--yes", "--", "example-package@1.2.3"] }
+  ];
+  const unpinned = pinned.map(({ command, args }) => ({
+    command,
+    args: args.map((arg) => arg.replace("example-package@1.2.3", "example-package"))
+  }));
+
+  for (const server of pinned) {
+    const report = scanConfig("package-separator", JSON.stringify({ mcpServers: { test: server } }));
+    assert.equal(report.findings.some((finding) => finding.id === "package.unpinned"), false, `${server.command} ${server.args.join(" ")}`);
+  }
+
+  for (const server of unpinned) {
+    const report = scanConfig("package-separator", JSON.stringify({ mcpServers: { test: server } }));
+    assert.equal(report.findings.some((finding) => finding.id === "package.unpinned"), true, `${server.command} ${server.args.join(" ")}`);
+  }
+});
+
 test("CLI scans a file and exits zero below the fail threshold", async () => {
   const { stdout } = await execFileAsync("node", [
     "dist/src/cli.js",
