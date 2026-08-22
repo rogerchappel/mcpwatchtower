@@ -78,7 +78,8 @@ It currently flags:
 - shell evaluation such as `bash -c`
 - network downloads piped to a shell
 - unpinned package-manager launches such as `npx package` (including package
-  selectors such as `npm exec --package=package` and `uvx --from package`)
+  selectors such as `npm exec --package=package`, `uvx --from package`, and
+  package specs after an argument separator such as `npm exec -- example-package`)
 - broad or sensitive-looking environment pass-through
 - Docker volume and bind mounts that are writable by default or explicitly
   writable; `:ro`, `:readonly`, and `readonly=true` mounts are allowed
