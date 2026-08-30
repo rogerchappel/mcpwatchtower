@@ -81,8 +81,9 @@ It currently flags:
   selectors such as `npm exec --package=package`, `uvx --from package`, and
   package specs after an argument separator such as `npm exec -- example-package`)
 - broad or sensitive-looking environment pass-through
-- Docker volume and bind mounts that are writable by default or explicitly
-  writable; `:ro`, `:readonly`, and `readonly=true` mounts are allowed
+- Docker and Podman volume or bind mounts that are writable by default or
+  explicitly writable; `:ro`, `:readonly`, and `readonly=true` mounts are
+  allowed (similar flags on ordinary non-container commands are ignored)
 - duplicate server or tool names where tools are listed in config
 
 `--fail-on` controls the exit threshold and defaults to `high`.
