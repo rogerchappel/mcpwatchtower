@@ -214,6 +214,28 @@ test("scanConfig distinguishes writable Docker mounts from read-only mounts", ()
   }
 });
 
+test("scanConfig limits mount flags to supported container runtimes", () => {
+  const ordinaryCommands = [
+    { command: "python", args: ["-v", "server.py"] },
+    { command: "/usr/local/bin/node", args: ["--volume", "trace.js"] },
+    { command: "tool.exe", args: ["--mount=type=bind,source=/workspace,target=/app"] }
+  ];
+
+  for (const server of ordinaryCommands) {
+    const report = scanConfig("mount", JSON.stringify({ mcpServers: { test: server } }));
+    assert.equal(report.findings.some((finding) => finding.id === "filesystem.writable-mount"), false, server.command);
+  }
+
+  const containerCommands = ["podman", "/usr/local/bin/docker", "C:\\Program Files\\RedHat\\Podman\\podman.exe"];
+  for (const command of containerCommands) {
+    const report = scanConfig(
+      "mount",
+      JSON.stringify({ mcpServers: { test: { command, args: ["run", "-v", "/workspace:/app", "image@sha256:abc"] } } })
+    );
+    assert.equal(report.findings.some((finding) => finding.id === "filesystem.writable-mount"), true, command);
+  }
+});
+
 test("scanConfig parses package selector options for package runners", () => {
   const pinned = [
     { command: "npm", args: ["exec", "--yes", "--package=@scope/server@1.2.3", "--", "server"] },
