@@ -2,8 +2,13 @@ import { finding } from "../finding.js";
 import type { Finding, McpServer } from "../types.js";
 
 const mountFlags = new Set(["-v", "--volume", "--mount"]);
+const containerRuntimes = new Set(["docker", "podman"]);
 
 export function scanWritableMounts(server: McpServer): Finding[] {
+  if (!isSupportedContainerRuntime(server.command)) {
+    return [];
+  }
+
   const findings: Finding[] = [];
 
   for (let index = 0; index < server.args.length; index += 1) {
@@ -31,6 +36,15 @@ export function scanWritableMounts(server: McpServer): Finding[] {
   }
 
   return findings;
+}
+
+function isSupportedContainerRuntime(command: string | undefined): boolean {
+  if (command === undefined) {
+    return false;
+  }
+
+  const basename = command.split(/[\\/]/).at(-1)?.toLowerCase().replace(/\.exe$/, "");
+  return basename !== undefined && containerRuntimes.has(basename);
 }
 
 function isReadOnlyMount(arg: string, candidate: string): boolean {
