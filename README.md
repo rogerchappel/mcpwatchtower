@@ -79,7 +79,10 @@ It currently flags:
 - network downloads piped to a shell
 - unpinned package-manager launches such as `npx package` (including package
   selectors such as `npm exec --package=package`, `uvx --from package`, and
-  package specs after an argument separator such as `npm exec -- example-package`)
+  package specs after an argument separator such as `npm exec -- example-package`);
+  Git URL specs count as pinned only with a full 40- or 64-hex commit in the
+  fragment, or in a `sha`, `commit`, or `ref` parameter—branches and tags remain
+  mutable and are reported
 - broad or sensitive-looking environment pass-through
 - Docker and Podman volume or bind mounts that are writable by default or
   explicitly writable; `:ro`, `:readonly`, and `readonly=true` mounts are
