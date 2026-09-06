@@ -409,6 +409,7 @@ test("CLI help references a shipped example", async () => {
 
   assert.ok(examplePath, "expected CLI help to reference an example config");
   await access(examplePath);
+  assert.match(stdout, /Git package URLs must use a full 40- or 64-hex commit/);
 });
 
 async function spawnWithInput(command: string, args: string[], input: string): Promise<{ code: number | null; stdout: string; stderr: string }> {

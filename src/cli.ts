@@ -166,6 +166,8 @@ function helpText(): string {
 
 Server entries require a non-empty string command. Optional args is a string
 array, env is an object map, and tools is an array of names or named objects.
+Git package URLs must use a full 40- or 64-hex commit; tags and branches are
+reported as unpinned.
 
 Examples:
   mcpwatchtower scan .mcp.json

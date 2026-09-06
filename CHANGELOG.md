@@ -7,6 +7,10 @@ format and uses semantic versioning when versioned releases are published.
 
 ## [Unreleased]
 
+### Fixed
+
+- Report Git package URLs that use mutable tag or branch references as unpinned.
+
 ### Added
 
 - Local-first `mcpwatchtower scan` CLI for MCP config preflight checks.
