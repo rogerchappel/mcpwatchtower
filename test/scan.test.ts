@@ -32,6 +32,36 @@ test("scanConfig allows clean pinned configs", async () => {
   assert.deepEqual(report.findings, []);
 });
 
+test("scanConfig reports mutable Git package references as unpinned", () => {
+  for (const spec of [
+    "git+https://example.invalid/pkg.git#tag=beta",
+    "git+https://example.invalid/pkg.git#tag=canary",
+    "git+https://example.invalid/pkg.git#ref=develop",
+    "https://example.invalid/pkg.git?ref=release/next"
+  ]) {
+    const report = scanConfig("git-package.json", JSON.stringify({
+      mcpServers: { package: { command: "npx", args: [spec] } }
+    }));
+
+    assert.ok(report.findings.some((finding) => finding.id === "package.unpinned"), spec);
+  }
+});
+
+test("scanConfig allows immutable Git package references", () => {
+  const commit = "0123456789abcdef0123456789abcdef01234567";
+  for (const spec of [
+    `git+https://example.invalid/pkg.git#${commit}`,
+    `git+https://example.invalid/pkg.git#commit=${commit}`,
+    `https://example.invalid/pkg.git?ref=${commit}`
+  ]) {
+    const report = scanConfig("git-package.json", JSON.stringify({
+      mcpServers: { package: { command: "npx", args: [spec] } }
+    }));
+
+    assert.ok(!report.findings.some((finding) => finding.id === "package.unpinned"), spec);
+  }
+});
+
 test("scanConfig accepts each supported non-empty config shape", () => {
   const server = { command: "node", args: ["server.js"] };
   const configs = [
