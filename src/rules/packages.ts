@@ -85,7 +85,9 @@ function invocationArgs(command: string, args: string[]): string[] | undefined {
 
 function isPinned(spec: string): boolean {
   if (/^(https?:|git\+|file:)/.test(spec)) {
-    return /[#?](?:sha|ref|commit|tag)=?[A-Fa-f0-9._/-]+/.test(spec) || /#[A-Fa-f0-9]{7,}/.test(spec);
+    const commit = "[A-Fa-f0-9]{40}(?:[A-Fa-f0-9]{24})?";
+    return new RegExp(`#${commit}$`).test(spec)
+      || new RegExp(`[#?&](?:sha|ref|commit)=${commit}(?:[&#]|$)`).test(spec);
   }
 
   const withoutScope = spec.startsWith("@") ? spec.slice(1) : spec;
