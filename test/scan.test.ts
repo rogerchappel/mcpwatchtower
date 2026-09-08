@@ -312,6 +312,34 @@ test("scanConfig parses package specs after an argument separator", () => {
   }
 });
 
+test("scanConfig evaluates every repeated npm exec package selector", () => {
+  const cases = [
+    {
+      args: ["exec", "--package", "safe@1.0.0", "--package", "mutable", "--", "server"],
+      unpinned: true
+    },
+    {
+      args: ["exec", "-p", "safe@1.0.0", "-p=mutable", "--", "server"],
+      unpinned: true
+    },
+    {
+      args: ["exec", "--package=safe@1.0.0", "--package=other@2.0.0", "--", "server"],
+      unpinned: false
+    }
+  ];
+
+  for (const { args, unpinned } of cases) {
+    const report = scanConfig("npm-packages", JSON.stringify({
+      mcpServers: { test: { command: "npm", args } }
+    }));
+    assert.equal(
+      report.findings.some((finding) => finding.id === "package.unpinned"),
+      unpinned,
+      `npm ${args.join(" ")}`
+    );
+  }
+});
+
 test("CLI scans a file and exits zero below the fail threshold", async () => {
   const { stdout } = await execFileAsync("node", [
     "dist/src/cli.js",
