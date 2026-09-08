@@ -14,8 +14,8 @@ export function scanPackageSpecs(server: McpServer): Finding[] {
     return [];
   }
 
-  const spec = packageSpec(command, server.args);
-  if (!spec || isPinned(spec)) {
+  const specs = packageSpecs(command, server.args);
+  if (specs.length === 0 || specs.every(isPinned)) {
     return [];
   }
 
@@ -32,25 +32,35 @@ export function scanPackageSpecs(server: McpServer): Finding[] {
   ];
 }
 
-function packageSpec(command: string, args: string[]): string | undefined {
+function packageSpecs(command: string, args: string[]): string[] {
   const invocation = invocationArgs(command, args);
   if (!invocation) {
-    return undefined;
+    return [];
   }
 
+  const selected: string[] = [];
   for (let index = 0; index < invocation.length; index += 1) {
     const arg = invocation[index];
     if (arg === undefined || arg === "--") {
       break;
     }
     if (packageOptions.has(arg)) {
-      return invocation[index + 1];
+      const value = invocation[index + 1];
+      if (value && value !== "--") {
+        selected.push(value);
+        index += 1;
+      }
+      continue;
     }
     for (const option of packageOptions) {
       if (arg.startsWith(`${option}=`)) {
-        return arg.slice(option.length + 1);
+        selected.push(arg.slice(option.length + 1));
+        break;
       }
     }
+  }
+  if (selected.length > 0) {
+    return selected;
   }
 
   for (let index = 0; index < invocation.length; index += 1) {
@@ -64,11 +74,11 @@ function packageSpec(command: string, args: string[]): string | undefined {
     if (optionsWithValues.has(arg)) {
       index += 1;
     } else if (!arg.startsWith("-")) {
-      return arg;
+      return [arg];
     }
   }
 
-  return undefined;
+  return [];
 }
 
 function invocationArgs(command: string, args: string[]): string[] | undefined {
