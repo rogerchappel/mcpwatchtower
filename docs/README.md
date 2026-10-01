@@ -6,6 +6,7 @@ This directory holds project documentation.
 
 - [Contributing guide](../CONTRIBUTING.md)
 - [Security policy](../SECURITY.md)
+- [Understanding findings and false positives](FALSE-POSITIVES.md)
 - [Agent instructions](../AGENTS.md)
 
 ## Additional docs
